@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壽星齊聚 · 生日快樂</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0b0514;
+            color: #fff;
+            font-family: 'PingFang TC', 'Heiti TC', 'Noto Sans TC', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px 20px 60px 20px; 
+            /* 向量級夢幻光暈背景 */
+            background: 
+                radial-gradient(circle at 50% 25%, rgba(255, 215, 0, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 20% 20%, rgba(255, 105, 180, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 50% 100%, #1e0933 0%, #05020a 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 全螢幕開場互動蓋板 */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 5, 20, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .welcome-card {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 24px;
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            max-width: 90%;
+            width: 420px;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #3a1a00;
+            border: none;
+            padding: 16px 36px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.9);
+        }
+
+        /* 頂部華麗主標題 */
+        .header-title {
+            font-size: 3.5rem; 
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 100, 0, 0.5);
+            margin-top: 10px;    
+            margin-bottom: 25px;  
+            letter-spacing: 4px;
+            animation: bounceTitle 2s infinite alternate;
+            text-align: center;
+            z-index: 20;
+        }
+
+        /* 音樂控制按鈕 */
+        .music-controller-mini {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .music-btn-mini {
+            background: rgba(255, 215, 0, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 215, 0, 0.8);
+            color: #ffd700;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            outline: none;
+        }
+
+        .music-btn-mini:hover {
+            transform: scale(1.12) rotate(12deg);
+            background: rgba(255, 215, 0, 0.45);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+        }
+
+        .music-btn-mini.playing {
+            animation: pulseGlow 1.5s infinite alternate;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #3a1a00;
+        }
+
+        /* 高畫質城堡蛋糕容器 */
+        .cake-castle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px; 
+            width: 100%;
+            max-width: 1400px;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.7));
+        }
+
+        /* 蠟燭與名單通用樣式 */
+        .candle-cluster {
+            display: flex;
+            justify-content: center;
+            gap: 15px; 
+            width: 100%; 
+            flex-wrap: wrap; 
+            margin-bottom: -35px; 
+            z-index: 10;
+        }
+
+        /* 第一層設定 */
+        #layer1-names {
+            animation: fadeInLayer 1s ease-out forwards;
+            animation-delay: 0s;
+            opacity: 0;
+            max-width: 950px; 
+        }
+        #layer1-names .name-tag {
+            width: calc(25% - 15px); 
+            min-width: 190px;        
+            text-align: center;
+        }
+
+        /* 第二層設定 */
+        #layer2-names {
+            animation: fadeInLayer 1s ease-out forwards;
+            animation-delay: 3s; 
+            opacity: 0;
+            max-width: 750px; 
+        }
+        #layer2-names .name-tag {
+            width: calc(33.33% - 15px); 
+            min-width: 175px;
+            text-align: center;
+        }
+
+        /* 第三層設定 */
+        #layer3-names {
+            animation: fadeInLayer 1s ease-out forwards;
+            animation-delay: 6s; 
+            opacity: 0;
+            max-width: 1300px;
+            margin-top: -30px; 
+        }
+        #layer3-names .name-tag {
+            width: calc(20% - 15px); 
+            min-width: 200px; 
+            text-align: center;
+        }
+
+        /* 精細水晶蠟燭名稱標籤 */
+        .name-tag {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 60%, #ffeaa7 100%); 
+            color: #3a1a00; 
+            padding: 10px 18px; 
+            border-radius: 25px;
+            font-size: 1.5rem;  
+            font-weight: 900; 
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 1); 
+            border: 3px solid #ffd700; 
+            white-space: nowrap;
+            animation: floatName 3s infinite ease-in-out;
+            margin-top: 5px;   
+        }
+
+        .name-tag span {
+            font-size: 1rem;   
+            color: #ffffff;
+            display: inline-block;
+            margin-right: 8px;
+            background: linear-gradient(135deg, #ff8c00, #d35400); 
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            vertical-align: middle;
+            border: 1px solid #ffe680;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .name-tag::before {
+            content: '';
+            position: absolute;
+            top: -26px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 22px;
+            background: radial-gradient(circle, #ffffff 10%, #ffcc00 50%, #ff4500 100%);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 15px #ffcc00, 0 0 30px #ff4500, 0 0 45px #ff0000;
+            animation: flicker 0.15s infinite alternate;
+        }
+
+        /* 超高畫質立體蛋糕層次 */
+        .tier {
+            border-radius: 50% / 18%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 95%; 
+        }
+
+        .tier::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            width: 100%;
+            height: 20px;
+            background: repeating-linear-gradient(90deg, #ffffff, #ffffff 12px, #fff2f5 12px, #ffe0e8 24px);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 4;
+        }
+
+        .tier-top {
+            width: 750px; 
+            height: 120px;
+            z-index: 5;
+            background: linear-gradient(180deg, #fff5f8 0%, #ffd0dc 70%, #f7b1c4 100%);
+            box-shadow: inset 0 8px 12px rgba(255, 255, 255, 0.9), inset 0 -15px 20px rgba(219, 112, 147, 0.4);
+        }
+
+        .tier-middle {
+            width: 1050px; 
+            height: 150px; 
+            z-index: 3;
+            margin-top: -20px; 
+            background: linear-gradient(180deg, #fff0f3 0%, #ffc2d1 70%, #f7a3b7 100%);
+            box-shadow: inset 0 8px 12px rgba(255, 255, 255, 0.9), inset 0 -15px 25px rgba(219, 112, 147, 0.5);
+        }
+
+        .tier-bottom {
+            width: 1350px; 
+            height: 170px; 
+            z-index: 1;
+            margin-top: -30px; 
+            background: linear-gradient(180deg, #fff5f8 0%, #ffb3c6 70%, #f48fb1 100%);
+            box-shadow: inset 0 8px 12px rgba(255, 255, 255, 0.9), inset 0 -20px 30px rgba(199, 21, 133, 0.4);
+        }
+
+        .decorations {
+            position: absolute;
+            bottom: 25px;
+            width: 90%;
+            display: flex;
+            justify-content: space-around;
+            font-size: 2.3rem; 
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+            pointer-events: none; 
+            letter-spacing: -6px; 
+        }
+
+        .plate {
+            width: 1420px;
+            max-width: 98%;
+            height: 55px;
+            background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 70%, #b8b8b8 100%);
+            border-radius: 50% / 20%;
+            margin-top: -25px;
+            z-index: 0;
+            border-top: 3px solid #ffd700;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+
+        @keyframes fadeInLayer {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+            100% { transform: translateX(-50%) scale(1.18) skewX(4deg); opacity: 1; }
+        }
+        @keyframes floatName {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); } 
+        }
+        @keyframes bounceTitle {
+            0% { transform: scale(1); text-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+            100% { transform: scale(1.02); text-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 70px rgba(255, 69, 0, 0.7); }
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(255, 215, 0, 1); }
+        }
+
+        @media (max-width: 768px) {
+            .header-title { font-size: 2.2rem; }
+            .music-controller-mini { top: 12px; right: 12px; }
+            .music-btn-mini { width: 44px; height: 44px; font-size: 1.1rem; }
+            #layer1-names, #layer2-names, #layer3-names { max-width: 100%; }
+            #layer1-names .name-tag, #layer2-names .name-tag, #layer3-names .name-tag { width: auto; min-width: 0; }
+            .name-tag { font-size: 1rem; padding: 6px 12px; }
+            .name-tag span { font-size: 0.75rem; padding: 1px 6px; }
+            .decorations { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 全螢幕開場儀式感蓋板 -->
+    <div id="welcomeOverlay" class="welcome-overlay">
+        <div class="welcome-card">
+            <div class="welcome-title">🎂 慶生祝賀卡 🎂</div>
+            <div class="welcome-subtitle">點擊下方按鈕，開啟專屬生日音樂與慶典城堡</div>
+            <button id="startBtn" class="start-btn">✨ 開啟慶典 ✨</button>
+        </div>
+    </div>
+
+    <!-- 角落隱藏式音樂控制按鈕 -->
+    <div class="music-controller-mini">
+        <button id="togglePlayBtn" class="music-btn-mini" title="點擊播放/暫停生日音樂">
+            <span id="playIcon">🎵</span>
+        </button>
+    </div>
+
+    <!-- 音訊元件：預設載入線上有版權許可之生日樂曲網址（確保單一 HTML 即可撥放） -->
+    <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a7305d.mp3" loop preload="auto"></audio>
+
+    <!-- 頂部華麗主標題 -->
+    <div class="header-title">✨ 壽星齊聚 · 生日快樂 ✨</div>
+
+    <div class="cake-castle">
+        
+        <!-- 【第一層】 -->
+        <div class="candle-cluster" id="layer1-names">
+            <div class="name-tag" style="animation-delay: 0s, 0s;"><span>校長</span>陳啓川</div>
+            <div class="name-tag" style="animation-delay: 0s, 0.2s;"><span>會長</span>蔡世緯</div>
+            <div class="name-tag" style="animation-delay: 0s, 0.4s;"><span>輔導會長</span>顏瑞廷</div>
+            <div class="name-tag" style="animation-delay: 0s, 0.6s;"><span>輔導會長夫人</span>郁紋</div>
+            <div class="name-tag" style="animation-delay: 0s, 0.8s;"><span>教務主任</span>吳貞瑩</div>
+            <div class="name-tag" style="animation-delay: 0s, 1.0s;"><span>總務主任</span>蔡克成</div>
+            <div class="name-tag" style="animation-delay: 0s, 1.2s;"><span>會計主任</span>黃彩鳳</div>
+            <div class="name-tag" style="animation-delay: 0s, 1.4s;"><span>體衛組長</span>洪千惠</div>
+        </div>
+        <div class="tier tier-top">
+            <div class="decorations" style="bottom: 15px;">
+                <span>🍓</span><span>🍒</span><span>🍓</span><span>🍒</span>
+            </div>
+        </div>
+
+        <!-- 【第二層】 -->
+        <div class="candle-cluster" id="layer2-names">
+            <div class="name-tag" style="animation-delay: 3s, 0.1s;"><span>教師</span>許珮綺</div>
+            <div class="name-tag" style="animation-delay: 3s, 0.3s;"><span>教師</span>李怡慧</div>
+            <div class="name-tag" style="animation-delay: 3s, 0.5s;"><span>教師</span>陳育滕</div>
+            <div class="name-tag" style="animation-delay: 3s, 0.7s;"><span>教師</span>蔡曜鴻</div>
+            <div class="name-tag" style="animation-delay: 3s, 0.9s;"><span>教師</span>林富珊</div>
+            <div class="name-tag" style="animation-delay: 3s, 1.1s;"><span>教師</span>陳佳信</div>
+        </div>
+        <div class="tier tier-middle">
+            <div class="decorations">
+                <span>🍓🍇</span><span>🍒🍓</span><span>🍓🍉</span><span>🍇🍓</span>
+            </div>
+        </div>
+
+        <!-- 【第三層】 -->
+        <div class="candle-cluster" id="layer3-names">
+            <div class="name-tag" style="animation-delay: 6s, 0.05s;"><span>教師</span>謝綵育</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.10s;"><span>教師</span>曾琪雅</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.15s;"><span>教師</span>吳柏皓</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.20s;"><span>教師</span>蕭亦婷</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.25s;"><span>教師</span>王廷恩</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.30s;"><span>教師</span>洪婉菁</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.35s;"><span>教師</span>吳佳燕</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.40s;"><span>教師</span>柯瑋馨</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.45s;"><span>教師</span>李佳華</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.50s;"><span>教師</span>李永熹</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.55s;"><span>行政人員</span>蔡依樺</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.60s;"><span>行政人員</span>程婷鈺</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.65s;"><span>行政人員</span>陳翊庭</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.70s;"><span>廚媽</span>紀芷琳</div>
+            <div class="name-tag" style="animation-delay: 6s, 0.75s;"><span>廚媽</span>劉玉琴</div>
+        </div>
+        <div class="tier tier-bottom">
+            <div class="decorations">
+                <span>🍇🍉</span><span>🍓🍍</span><span>🍒🍇</span><span>🍉🍓</span><span>🍍🍒</span>
+            </div>
+        </div>
+
+        <div class="plate"></div>
+
+    </div>
+
+    <script>
+        const audio = document.getElementById('bgMusic');
+        const toggleBtn = document.getElementById('togglePlayBtn');
+        const playIcon = document.getElementById('playIcon');
+        const startBtn = document.getElementById('startBtn');
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+
+        function setUIPlaying() {
+            playIcon.innerText = '⏸';
+            toggleBtn.classList.add('playing');
+        }
+
+        function setUIPaused() {
+            playIcon.innerText = '🎵';
+            toggleBtn.classList.remove('playing');
+        }
+
+        // 開場按鈕點擊觸發播放與淡出蓋板
+        startBtn.addEventListener('click', () => {
+            audio.play().then(() => {
+                setUIPlaying();
+            }).catch(err => {
+                console.log("Audio play failed:", err);
+            });
+
+            // 蓋板淡出動畫
+            welcomeOverlay.style.opacity = '0';
+            setTimeout(() => {
+                welcomeOverlay.style.visibility = 'hidden';
+            }, 800);
+        });
+
+        // 音樂切換控制
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().then(() => {
+                    setUIPlaying();
+                });
+            } else {
+                audio.pause();
+                setUIPaused();
+            }
+        });
+    </script>
+</body>
+</html>
