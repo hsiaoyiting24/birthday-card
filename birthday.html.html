@@ -376,8 +376,8 @@
         </button>
     </div>
 
-    <!-- 音訊元件：改為載入同目錄下的生日樂曲 mp3 檔 -->
-<audio id="bgMusic" src="birthday.mp3" loop preload="auto"></audio>
+    <!-- 音訊元件：改為載入同目錄下的內建 MP3 檔案 -->
+    <audio id="bgMusic" src="birthday.mp3" loop preload="auto"></audio>
 
     <!-- 頂部華麗主標題 -->
     <div class="header-title">✨ 壽星齊聚 · 生日快樂 ✨</div>
@@ -467,6 +467,7 @@
                 setUIPlaying();
             }).catch(err => {
                 console.log("Audio play failed:", err);
+                alert("播放音樂失敗，請確認同目錄下是否有 birthday.mp3 檔案！");
             });
 
             // 蓋板淡出動畫
@@ -482,6 +483,8 @@
             if (audio.paused) {
                 audio.play().then(() => {
                     setUIPlaying();
+                }).catch(err => {
+                    console.log("Audio play failed:", err);
                 });
             } else {
                 audio.pause();
